@@ -39,7 +39,6 @@ type Trie struct {
 
 var (
 	schemaregex = regexp.MustCompile(`^([abcdefghijklmnopqrstuvwxyz0123456789\+\-\.]+:)?//`)
-	domainregex = regexp.MustCompile(`^[a-z0-9-]{1,63}$`)
 	ip4regex    = regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])`)
 )
 
@@ -129,10 +128,15 @@ func (extract *TLDExtract) extract(url string) *Result {
 		return &Result{Flag: Malformed}
 	}
 	sub, root := subdomain(domain)
-	if domainregex.MatchString(root) {
-		return &Result{Flag: Domain, Root: root, Sub: sub, Tld: tld}
+
+	for _, c := range(root) {
+		if (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c == '-') || (c >= 0x80) {
+			continue
+		}
+		return &Result{Flag: Malformed}
 	}
-	return &Result{Flag: Malformed}
+
+	return &Result{Flag: Domain, Root: root, Sub: sub, Tld: tld}
 }
 
 func (extract *TLDExtract) extractTld(url string) (domain, tld string) {
