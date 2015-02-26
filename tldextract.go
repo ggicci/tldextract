@@ -129,7 +129,7 @@ func (extract *TLDExtract) extract(url string) *Result {
 	}
 	sub, root := subdomain(domain)
 
-	for _, c := range(root) {
+	for _, c := range root {
 		if (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c == '-') || (c >= 0x80) {
 			continue
 		}
@@ -154,26 +154,41 @@ func (extract *TLDExtract) extractTld(url string) (domain, tld string) {
 func (extract *TLDExtract) getTldIndex(labels []string) (int, bool) {
 	t := extract.rootNode
 	parentValid := false
+	wildcard := false
+
 	for i := len(labels) - 1; i >= 0; i-- {
 		lab := labels[i]
-		n, found := t.matches[lab]
-		_, starfound := t.matches["*"]
+
+		// If wildcard found before and we reach this point, it means we have an
+		// actual domain name besides what the wildcard matches, e.g.
+		// *.il in the suffix file and we have a  domain.co.il  instead of only
+		// co.il (which would be invalid)
+		if wildcard {
+			return i + 1, true
+		}
+
+		n, exactMatch := t.matches[lab]
+
+		_, wildcard = t.matches["*"]
 
 		switch {
-		case found && !n.ExceptRule:
-			parentValid = n.ValidTld
+		case exactMatch && !n.ExceptRule:
+			parentValid = n.ValidTld // exact match, not exception
 			t = n
-		// Found an exception rule
-		case found:
-			fallthrough
-		case parentValid:
+		case exactMatch: // an exception rule, valid
 			return i + 1, true
-		case starfound:
-			parentValid = true
-		default:
+
+		case parentValid: // no match and parent was valid tld.
+			return i + 1, true
+
+		case wildcard: // on wildcard, continue the loop as we need
+			continue // at least another label.
+
+		default: // all other cases
 			return -1, false
 		}
 	}
+
 	return -1, false
 }
 

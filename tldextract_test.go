@@ -45,6 +45,8 @@ func TestAll(t *testing.T) {
 		"http://216.22.project.coop/":                     &Result{Flag: Domain, Sub: "216.22", Root: "project", Tld: "coop"},
 		"http://Gmail.org/":                               &Result{Flag: Domain, Root: "gmail", Tld: "org"},
 		"http://wiki.info/":                               &Result{Flag: Domain, Root: "wiki", Tld: "info"},
+		"http://www.kali.co.il/":                          &Result{Flag: Domain, Sub: "www", Root: "kali", Tld: "co.il"},
+		"http://co.il/":                                   &Result{Flag: Malformed},
 		"http://wiki.information/":                        &Result{Flag: Malformed},
 		"http://wiki/":                                    &Result{Flag: Malformed},
 		"http://258.15.32.876":                            &Result{Flag: Malformed},
