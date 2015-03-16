@@ -71,6 +71,7 @@ func TestAll(t *testing.T) {
 		"city.a.kobe.jp":      &Result{Flag: Domain, Sub: "", Root: "city", Tld: "a.kobe.jp"},
 		"blogspot.co.uk":      &Result{Flag: Malformed},
 		"blah.blogspot.co.uk": &Result{Flag: Domain, Sub: "", Root: "blah", Tld: "blogspot.co.uk"},
+                "啪啪啪.中国":         &Result{Flag: Domain, Sub: "", Root: "啪啪啪", Tld: "中国"},
 	}
 	for url, expected := range cases {
 		returned := tldExtract.Extract(url)
